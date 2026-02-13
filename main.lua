@@ -1,504 +1,674 @@
-local _0x000e = _0x000f:_0x0010(string.char(80, 108, 97, 121, 101, 114, 115))
-local _0x0011 = _0x000f:_0x0010(string.char(85, 115, 101, 114, 73, 110, 112, 117, 116, 83, 101, 114, 118, 105, 99, 101))
-local _0x0012 = _0x000f:_0x0010(string.char(80, 114, 111, 120, 105, 109, 105, 116, 121, 80, 114, 111, 109, 112, 116, 83, 101, 114, 118, 105, 99, 101))
-local _0x0013 = _0x000f:_0x0010(string.char(84, 119, 101, 101, 110, 83, 101, 114, 118, 105, 99, 101))
-local _0x0014 = _0x0015._0x0016
-local _0x0017 = _0x000e._0x0018
-local _0x0018 = _0x0017
-local _0x001b = {
-_0x001c = _0x001d._0x001e((9 + 9), (36 / 2), 22),
-_0x001f = _0x001d._0x001e((56 / 2), (112 / 4), 34),
-_0x0020 = _0x001d._0x001e(99, 102, (261 - 20)),
-_0x0021 = _0x001d._0x001e((86 - 52), 197, 94),
-_0x0022 = _0x001d._0x001e(239, (136 / 2), (34 + 34)),
-_0x0023 = _0x001d._0x001e(255, (1020 / 4), 255),
-_0x0024 = _0x001d._0x001e((257 - 97), 160, 180),
-_0x0025 = _0x001d._0x001e(168, 85, 247),
-_0x0026 = _0x001d._0x001e((333 - 78), (35 + 35), (210 / 3)),
+--[[
+╔════════════════════════════════════════════════════════════╗
+║   MULTI TOOL PANEL - AUTO COOK + ALT CLICK HAPUS          ║
+║   Gabungan 2 script dengan panel terpisah & dragable      ║
+╚════════════════════════════════════════════════════════════╝
+]]
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local TweenService = game:GetService("TweenService")
+local Camera = workspace.CurrentCamera
+
+local player = Players.LocalPlayer
+local LocalPlayer = player
+
+-- ================= COLOR THEME =================
+local colors = {
+    bg = Color3.fromRGB(18, 18, 22),
+    surface = Color3.fromRGB(28, 28, 34),
+    primary = Color3.fromRGB(99, 102, 241),
+    success = Color3.fromRGB(34, 197, 94),
+    danger = Color3.fromRGB(239, 68, 68),
+    text = Color3.fromRGB(255, 255, 255),
+    textDim = Color3.fromRGB(160, 160, 180),
+    accent = Color3.fromRGB(168, 85, 247),
+    delete = Color3.fromRGB(255, 70, 70),
 }
-local _0x0029 = _0x002a._0x002b(string.char(83, 99, 114, 101, 101, 110, 71, 117, 105))
-_0x0029._0x002c = string.char(77, 117, 108, 116, 105, 84, 111, 111, 108, 80, 97, 110, 101, 108)
-_0x0029._0x002d = false
-_0x0029._0x002e = _0x0017:_0x002f(string.char(80, 108, 97, 121, 101, 114, 71, 117, 105))
-local _0x0033 = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x0033._0x0034 = _0x0035._0x002b(0, 320, 0, 380)
-_0x0033._0x0036 = _0x0035._0x002b(0.02, 0, 0.1, 0)
-_0x0033._0x0038 = _0x001b._0x001c
-_0x0033._0x0039 = 0.1
-_0x0033._0x003a = 0
-_0x0033._0x002e = _0x0029
-for _0x003d = 1, 3 do
-local _0x003e = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x003e._0x0034 = _0x0035._0x002b(1, 8*_0x003d, 1, 8*_0x003d)
-_0x003e._0x0036 = _0x0035._0x002b(0, -4*_0x003d, 0, -(12 / 3)*_0x003d)
-_0x003e._0x0038 = _0x001b._0x0020
-_0x003e._0x0039 = 0.9
-_0x003e._0x003a = 0
-_0x003e._0x003f = -_0x003d
-_0x003e._0x002e = _0x0033
-local _0x0040 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0040._0x0041 = _0x0042._0x002b(0, 20 + (2*_0x003d))
-_0x0040._0x002e = _0x003e
+
+-- ================= GLOBAL GUI =================
+local gui = Instance.new("ScreenGui")
+gui.Name = "MultiToolPanel"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- ============================================================================
+-- PANEL 1: AUTO COOK (KIRI)
+-- ============================================================================
+
+-- ================= MAIN FRAME AUTO COOK =================
+local cookFrame = Instance.new("Frame")
+cookFrame.Size = UDim2.new(0, 320, 0, 380)
+cookFrame.Position = UDim2.new(0.02, 0, 0.1, 0)  -- Kiri
+cookFrame.BackgroundColor3 = colors.bg
+cookFrame.BackgroundTransparency = 0.1
+cookFrame.BorderSizePixel = 0
+cookFrame.Parent = gui
+
+-- Glow effect
+for i = 1, 3 do
+    local glow = Instance.new("Frame")
+    glow.Size = UDim2.new(1, 8*i, 1, 8*i)
+    glow.Position = UDim2.new(0, -4*i, 0, -4*i)
+    glow.BackgroundColor3 = colors.primary
+    glow.BackgroundTransparency = 0.9
+    glow.BorderSizePixel = 0
+    glow.ZIndex = -i
+    glow.Parent = cookFrame
+    
+    local glowCorner = Instance.new("UICorner")
+    glowCorner.CornerRadius = UDim.new(0, 20 + (2*i))
+    glowCorner.Parent = glow
 end
-local _0x0043 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0043._0x0041 = _0x0042._0x002b(0, 20)
-_0x0043._0x002e = _0x0033
-local _0x0046 = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x0046._0x0034 = _0x0035._0x002b(1, 0, 0, 50)
-_0x0046._0x0038 = _0x001b._0x001f
-_0x0046._0x0039 = 0.3
-_0x0046._0x003a = 0
-_0x0046._0x002e = _0x0033
-local _0x0047 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0047._0x0041 = _0x0042._0x002b(0, 20)
-_0x0047._0x002e = _0x0046
-local _0x004a = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x004a._0x0034 = _0x0035._0x002b(0, 40, 1, 0)
-_0x004a._0x0036 = _0x0035._0x002b(0, 10, 0, 0)
-_0x004a._0x0039 = 1
-_0x004a._0x004b = string.char(55356, 57203)
-_0x004a._0x004c = _0x001b._0x0023
-_0x004a._0x004d = 24
-_0x004a._0x004e = _0x004f._0x004e._0x0050
-_0x004a._0x002e = _0x0046
-local _0x0051 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0051._0x0034 = _0x0035._0x002b(1, -120, 1, 0)
-_0x0051._0x0036 = _0x0035._0x002b(0, (101 - 46), 0, 0)
-_0x0051._0x0039 = 1
-_0x0051._0x004b = string.char(65, 85, 84, 79, 32, 67, 79, 79, 75)
-_0x0051._0x004c = _0x001b._0x0023
-_0x0051._0x004d = 18
-_0x0051._0x004e = _0x004f._0x004e._0x0052
-_0x0051._0x0053 = _0x004f._0x0053._0x0054
-_0x0051._0x002e = _0x0046
-local _0x0057 = _0x002a._0x002b(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
-_0x0057._0x0034 = _0x0035._0x002b(0, 35, 0, 35)
-_0x0057._0x0036 = _0x0035._0x002b(1, -80, 0.5, -(1750 / 100))
-_0x0057._0x0038 = _0x001b._0x001f
-_0x0057._0x004b = string.char(8722)
-_0x0057._0x004c = _0x001b._0x0023
-_0x0057._0x004d = 24
-_0x0057._0x004e = _0x004f._0x004e._0x0050
-_0x0057._0x0058 = false
-_0x0057._0x002e = _0x0046
-local _0x0059 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0059._0x0041 = _0x0042._0x002b(0, 10)
-_0x0059._0x002e = _0x0057
-local _0x005f = _0x002a._0x002b(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
-_0x005f._0x0034 = _0x0035._0x002b(0, 35, 0, (109 - 74))
-_0x005f._0x0036 = _0x0035._0x002b(1, -40, 0.5, -17.5)
-_0x005f._0x0038 = _0x001b._0x0022
-_0x005f._0x004b = string.char(10005)
-_0x005f._0x004c = _0x001b._0x0023
-_0x005f._0x004d = (80 / 4)
-_0x005f._0x004e = _0x004f._0x004e._0x0050
-_0x005f._0x0058 = false
-_0x005f._0x002e = _0x0046
-local _0x0060 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0060._0x0041 = _0x0042._0x002b(0, 10)
-_0x0060._0x002e = _0x005f
-local _0x0062 = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x0062._0x0034 = _0x0035._0x002b(1, -30, 1, -(210 / 3))
-_0x0062._0x0036 = _0x0035._0x002b(0, 15, 0, 60)
-_0x0062._0x0039 = 1
-_0x0062._0x002e = _0x0033
-local _0x0064 = _0x002a._0x002b(string.char(84, 101, 120, 116, 66, 117, 116, 116, 111, 110))
-_0x0064._0x0034 = _0x0035._0x002b(1, 0, 0, (27 + 28))
-_0x0064._0x0036 = _0x0035._0x002b(0, 0, 0, 0)
-_0x0064._0x0038 = _0x001b._0x0022
-_0x0064._0x004b = ""
-_0x0064._0x0058 = false
-_0x0064._0x002e = _0x0062
-local _0x0065 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0065._0x0041 = _0x0042._0x002b(0, (60 / 4))
-_0x0065._0x002e = _0x0064
-local _0x0066 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0066._0x0034 = _0x0035._0x002b(1, 0, 1, 0)
-_0x0066._0x0039 = 1
-_0x0066._0x004b = string.char(65, 85, 84, 79, 32, 67, 79, 79, 75, 32, 58, 32, 79, 70, 70)
-_0x0066._0x004c = _0x001b._0x0023
-_0x0066._0x004d = (9 + 9)
-_0x0066._0x004e = _0x004f._0x004e._0x0050
-_0x0066._0x002e = _0x0064
-local _0x0069 = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x0069._0x0034 = _0x0035._0x002b(1, 0, 0, (200 / 4))
-_0x0069._0x0036 = _0x0035._0x002b(0, 0, 0, (114 - 49))
-_0x0069._0x0038 = _0x001b._0x001f
-_0x0069._0x0039 = 0.3
-_0x0069._0x002e = _0x0062
-local _0x006a = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x006a._0x0041 = _0x0042._0x002b(0, (24 / 2))
-_0x006a._0x002e = _0x0069
-local _0x006b = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x006b._0x0034 = _0x0035._0x002b(0, (80 / 2), 1, 0)
-_0x006b._0x0036 = _0x0035._0x002b(0, (20 / 2), 0, 0)
-_0x006b._0x0039 = 1
-_0x006b._0x004b = string.char(9889)
-_0x006b._0x004c = _0x001b._0x0020
-_0x006b._0x004d = 20
-_0x006b._0x004e = _0x004f._0x004e._0x0050
-_0x006b._0x002e = _0x0069
-local _0x006c = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x006c._0x0034 = _0x0035._0x002b(1, -(111 - 51), 1, 0)
-_0x006c._0x0036 = _0x0035._0x002b(0, (118 - 63), 0, 0)
-_0x006c._0x0039 = 1
-_0x006c._0x004b = string.char(83, 116, 97, 116, 117, 115, 58, 32, 73, 100, 108, 101)
-_0x006c._0x004c = _0x001b._0x0023
-_0x006c._0x004d = (32 / 2)
-_0x006c._0x004e = _0x004f._0x004e._0x0050
-_0x006c._0x0053 = _0x004f._0x0053._0x0054
-_0x006c._0x002e = _0x0069
-local _0x006e = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x006e._0x0034 = _0x0035._0x002b(1, 0, 0, (190 - 50))
-_0x006e._0x0036 = _0x0035._0x002b(0, 0, 0, (143 - 18))
-_0x006e._0x0038 = _0x001b._0x001f
-_0x006e._0x0039 = 0.3
-_0x006e._0x002e = _0x0062
-local _0x006f = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x006f._0x0041 = _0x0042._0x002b(0, (6 + 6))
-_0x006f._0x002e = _0x006e
-local _0x0070 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0070._0x0034 = _0x0035._0x002b(1, -(60 / 3), 0, (12 + 13))
-_0x0070._0x0036 = _0x0035._0x002b(0, 15, 0, 8)
-_0x0070._0x0039 = 1
-_0x0070._0x004b = string.char(55357, 56550, 32, 73, 78, 86, 69, 78, 84, 79, 82, 89)
-_0x0070._0x004c = _0x001b._0x0020
-_0x0070._0x004d = 14
-_0x0070._0x004e = _0x004f._0x004e._0x0050
-_0x0070._0x0053 = _0x004f._0x0053._0x0054
-_0x0070._0x002e = _0x006e
-local _0x0071 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0071._0x0034 = _0x0035._0x002b(1, -20, 0, (360 / 4))
-_0x0071._0x0036 = _0x0035._0x002b(0, (7 + 8), 0, (105 / 3))
-_0x0071._0x0039 = 1
-_0x0071._0x004b = string.char(76, 111, 97, 100, 105, 110, 103, 46, 46, 46)
-_0x0071._0x004c = _0x001b._0x0024
-_0x0071._0x004d = (7 + 7)
-_0x0071._0x004e = _0x004f._0x004e._0x0072
-_0x0071._0x0053 = _0x004f._0x0053._0x0054
-_0x0071._0x0073 = _0x004f._0x0073._0x0074
-_0x0071._0x002e = _0x006e
-local _0x0077 = {
-_0x0078 = 0.2,
-_0x0079 = true,
+
+local cookCorner = Instance.new("UICorner")
+cookCorner.CornerRadius = UDim.new(0, 20)
+cookCorner.Parent = cookFrame
+
+-- ================= TOP BAR AUTO COOK =================
+local cookTopBar = Instance.new("Frame")
+cookTopBar.Size = UDim2.new(1, 0, 0, 50)
+cookTopBar.BackgroundColor3 = colors.surface
+cookTopBar.BackgroundTransparency = 0.3
+cookTopBar.BorderSizePixel = 0
+cookTopBar.Parent = cookFrame
+
+local cookTopBarCorner = Instance.new("UICorner")
+cookTopBarCorner.CornerRadius = UDim.new(0, 20)
+cookTopBarCorner.Parent = cookTopBar
+
+-- Title Icon
+local cookIcon = Instance.new("TextLabel")
+cookIcon.Size = UDim2.new(0, 40, 1, 0)
+cookIcon.Position = UDim2.new(0, 10, 0, 0)
+cookIcon.BackgroundTransparency = 1
+cookIcon.Text = "🍳"
+cookIcon.TextColor3 = colors.text
+cookIcon.TextSize = 24
+cookIcon.Font = Enum.Font.GothamBold
+cookIcon.Parent = cookTopBar
+
+-- Title Text
+local cookTitle = Instance.new("TextLabel")
+cookTitle.Size = UDim2.new(1, -120, 1, 0)
+cookTitle.Position = UDim2.new(0, 55, 0, 0)
+cookTitle.BackgroundTransparency = 1
+cookTitle.Text = "AUTO COOK"
+cookTitle.TextColor3 = colors.text
+cookTitle.TextSize = 18
+cookTitle.Font = Enum.Font.GothamBlack
+cookTitle.TextXAlignment = Enum.TextXAlignment.Left
+cookTitle.Parent = cookTopBar
+
+-- Minimize Button
+local cookMinimize = Instance.new("TextButton")
+cookMinimize.Size = UDim2.new(0, 35, 0, 35)
+cookMinimize.Position = UDim2.new(1, -80, 0.5, -17.5)
+cookMinimize.BackgroundColor3 = colors.surface
+cookMinimize.Text = "−"
+cookMinimize.TextColor3 = colors.text
+cookMinimize.TextSize = 24
+cookMinimize.Font = Enum.Font.GothamBold
+cookMinimize.AutoButtonColor = false
+cookMinimize.Parent = cookTopBar
+
+local cookMinCorner = Instance.new("UICorner")
+cookMinCorner.CornerRadius = UDim.new(0, 10)
+cookMinCorner.Parent = cookMinimize
+
+-- Close Button (sembunyiin panel aja, bukan hapus gui)
+local cookClose = Instance.new("TextButton")
+cookClose.Size = UDim2.new(0, 35, 0, 35)
+cookClose.Position = UDim2.new(1, -40, 0.5, -17.5)
+cookClose.BackgroundColor3 = colors.danger
+cookClose.Text = "✕"
+cookClose.TextColor3 = colors.text
+cookClose.TextSize = 20
+cookClose.Font = Enum.Font.GothamBold
+cookClose.AutoButtonColor = false
+cookClose.Parent = cookTopBar
+
+local cookCloseCorner = Instance.new("UICorner")
+cookCloseCorner.CornerRadius = UDim.new(0, 10)
+cookCloseCorner.Parent = cookClose
+
+-- ================= CONTENT AUTO COOK =================
+local cookContent = Instance.new("Frame")
+cookContent.Size = UDim2.new(1, -30, 1, -70)
+cookContent.Position = UDim2.new(0, 15, 0, 60)
+cookContent.BackgroundTransparency = 1
+cookContent.Parent = cookFrame
+
+-- Toggle Button
+local cookButton = Instance.new("TextButton")
+cookButton.Size = UDim2.new(1, 0, 0, 55)
+cookButton.Position = UDim2.new(0, 0, 0, 0)
+cookButton.BackgroundColor3 = colors.danger
+cookButton.Text = ""
+cookButton.AutoButtonColor = false
+cookButton.Parent = cookContent
+
+local cookBtnCorner = Instance.new("UICorner")
+cookBtnCorner.CornerRadius = UDim.new(0, 15)
+cookBtnCorner.Parent = cookButton
+
+local cookBtnText = Instance.new("TextLabel")
+cookBtnText.Size = UDim2.new(1, 0, 1, 0)
+cookBtnText.BackgroundTransparency = 1
+cookBtnText.Text = "AUTO COOK : OFF"
+cookBtnText.TextColor3 = colors.text
+cookBtnText.TextSize = 18
+cookBtnText.Font = Enum.Font.GothamBold
+cookBtnText.Parent = cookButton
+
+-- Status Card
+local cookStatusCard = Instance.new("Frame")
+cookStatusCard.Size = UDim2.new(1, 0, 0, 50)
+cookStatusCard.Position = UDim2.new(0, 0, 0, 65)
+cookStatusCard.BackgroundColor3 = colors.surface
+cookStatusCard.BackgroundTransparency = 0.3
+cookStatusCard.Parent = cookContent
+
+local cookStatusCorner = Instance.new("UICorner")
+cookStatusCorner.CornerRadius = UDim.new(0, 12)
+cookStatusCorner.Parent = cookStatusCard
+
+local cookStatusIcon = Instance.new("TextLabel")
+cookStatusIcon.Size = UDim2.new(0, 40, 1, 0)
+cookStatusIcon.Position = UDim2.new(0, 10, 0, 0)
+cookStatusIcon.BackgroundTransparency = 1
+cookStatusIcon.Text = "⚡"
+cookStatusIcon.TextColor3 = colors.primary
+cookStatusIcon.TextSize = 20
+cookStatusIcon.Font = Enum.Font.GothamBold
+cookStatusIcon.Parent = cookStatusCard
+
+local cookStatusLabel = Instance.new("TextLabel")
+cookStatusLabel.Size = UDim2.new(1, -60, 1, 0)
+cookStatusLabel.Position = UDim2.new(0, 55, 0, 0)
+cookStatusLabel.BackgroundTransparency = 1
+cookStatusLabel.Text = "Status: Idle"
+cookStatusLabel.TextColor3 = colors.text
+cookStatusLabel.TextSize = 16
+cookStatusLabel.Font = Enum.Font.GothamBold
+cookStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+cookStatusLabel.Parent = cookStatusCard
+
+-- Inventory Card
+local cookInvCard = Instance.new("Frame")
+cookInvCard.Size = UDim2.new(1, 0, 0, 140)
+cookInvCard.Position = UDim2.new(0, 0, 0, 125)
+cookInvCard.BackgroundColor3 = colors.surface
+cookInvCard.BackgroundTransparency = 0.3
+cookInvCard.Parent = cookContent
+
+local cookInvCorner = Instance.new("UICorner")
+cookInvCorner.CornerRadius = UDim.new(0, 12)
+cookInvCorner.Parent = cookInvCard
+
+local cookInvTitle = Instance.new("TextLabel")
+cookInvTitle.Size = UDim2.new(1, -20, 0, 25)
+cookInvTitle.Position = UDim2.new(0, 15, 0, 8)
+cookInvTitle.BackgroundTransparency = 1
+cookInvTitle.Text = "📦 INVENTORY"
+cookInvTitle.TextColor3 = colors.primary
+cookInvTitle.TextSize = 14
+cookInvTitle.Font = Enum.Font.GothamBold
+cookInvTitle.TextXAlignment = Enum.TextXAlignment.Left
+cookInvTitle.Parent = cookInvCard
+
+local cookInventoryLabel = Instance.new("TextLabel")
+cookInventoryLabel.Size = UDim2.new(1, -20, 0, 90)
+cookInventoryLabel.Position = UDim2.new(0, 15, 0, 35)
+cookInventoryLabel.BackgroundTransparency = 1
+cookInventoryLabel.Text = "Loading..."
+cookInventoryLabel.TextColor3 = colors.textDim
+cookInventoryLabel.TextSize = 14
+cookInventoryLabel.Font = Enum.Font.Gotham
+cookInventoryLabel.TextXAlignment = Enum.TextXAlignment.Left
+cookInventoryLabel.TextYAlignment = Enum.TextYAlignment.Top
+cookInventoryLabel.Parent = cookInvCard
+
+-- ============================================================================
+-- PANEL 2: ALT CLICK HAPUS (KANAN)
+-- ============================================================================
+
+-- Konfigurasi delete
+local deleteConfig = {
+    Cooldown = 0.2,
+    Enabled = true,
 }
-local _0x007a = 0
-local _0x007d = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x007d._0x0034 = _0x0035._0x002b(0, (90 + 90), 0, 60)
-_0x007d._0x0036 = _0x0035._0x002b(1, -200, 0.1, 0)
-_0x007d._0x0038 = _0x001b._0x001c
-_0x007d._0x0039 = 0.1
-_0x007d._0x003a = 0
-_0x007d._0x007f = true
-_0x007d._0x0080 = true
-_0x007d._0x002e = _0x0029
-for _0x003d = 1, 3 do
-local _0x003e = _0x002a._0x002b(string.char(70, 114, 97, 109, 101))
-_0x003e._0x0034 = _0x0035._0x002b(1, (32 / 4)*_0x003d, 1, 8*_0x003d)
-_0x003e._0x0036 = _0x0035._0x002b(0, -4*_0x003d, 0, -(12 / 3)*_0x003d)
-_0x003e._0x0038 = _0x001b._0x0026
-_0x003e._0x0039 = 0.9
-_0x003e._0x003a = 0
-_0x003e._0x003f = -_0x003d
-_0x003e._0x002e = _0x007d
-local _0x0040 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0040._0x0041 = _0x0042._0x002b(0, (98 - 86) + (2*_0x003d))
-_0x0040._0x002e = _0x003e
+
+local lastClick = 0
+
+-- Panel Delete
+local deletePanel = Instance.new("Frame")
+deletePanel.Size = UDim2.new(0, 180, 0, 60)
+deletePanel.Position = UDim2.new(1, -200, 0.1, 0)  -- Kanan
+deletePanel.BackgroundColor3 = colors.bg
+deletePanel.BackgroundTransparency = 0.1
+deletePanel.BorderSizePixel = 0
+deletePanel.Draggable = true
+deletePanel.Active = true
+deletePanel.Parent = gui
+
+-- Glow delete
+for i = 1, 3 do
+    local glow = Instance.new("Frame")
+    glow.Size = UDim2.new(1, 8*i, 1, 8*i)
+    glow.Position = UDim2.new(0, -4*i, 0, -4*i)
+    glow.BackgroundColor3 = colors.delete
+    glow.BackgroundTransparency = 0.9
+    glow.BorderSizePixel = 0
+    glow.ZIndex = -i
+    glow.Parent = deletePanel
+    
+    local glowCorner = Instance.new("UICorner")
+    glowCorner.CornerRadius = UDim.new(0, 12 + (2*i))
+    glowCorner.Parent = glow
 end
-local _0x0081 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0081._0x0041 = _0x0042._0x002b(0, 12)
-_0x0081._0x002e = _0x007d
-local _0x0082 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0082._0x0034 = _0x0035._0x002b(0, 30, 1, 0)
-_0x0082._0x0036 = _0x0035._0x002b(0, 10, 0, 0)
-_0x0082._0x0039 = 1
-_0x0082._0x004b = string.char(55357, 56785, 65039)
-_0x0082._0x004c = _0x001b._0x0026
-_0x0082._0x004d = 20
-_0x0082._0x004e = _0x004f._0x004e._0x0050
-_0x0082._0x002e = _0x007d
-local _0x0083 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0083._0x0034 = _0x0035._0x002b(0.5, 0, 1, 0)
-_0x0083._0x0036 = _0x0035._0x002b(0, 45, 0, 0)
-_0x0083._0x0039 = 1
-_0x0083._0x004b = string.char(72, 65, 80, 85, 83)
-_0x0083._0x004c = _0x001b._0x0023
-_0x0083._0x004d = 16
-_0x0083._0x004e = _0x004f._0x004e._0x0050
-_0x0083._0x0053 = _0x004f._0x0053._0x0054
-_0x0083._0x002e = _0x007d
-local _0x0086 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0086._0x0034 = _0x0035._0x002b(0, 45, 0, (50 / 2))
-_0x0086._0x0036 = _0x0035._0x002b(0, (218 - 98), 0.5, -(50 / 4))
-_0x0086._0x0038 = _0x001b._0x0021
-_0x0086._0x004b = string.char(79, 78)
-_0x0086._0x004c = _0x001b._0x0023
-_0x0086._0x004d = (56 / 4)
-_0x0086._0x004e = _0x004f._0x004e._0x0050
-_0x0086._0x002e = _0x007d
-local _0x0087 = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x0087._0x0041 = _0x0042._0x002b(0, 8)
-_0x0087._0x002e = _0x0086
-local _0x0089 = _0x002a._0x002b(string.char(84, 101, 120, 116, 76, 97, 98, 101, 108))
-_0x0089._0x0034 = _0x0035._0x002b(0, (168 - 68), 0, (48 / 3))
-_0x0089._0x0036 = _0x0035._0x002b(0, 10, 1, (101 - 97))
-_0x0089._0x0038 = _0x001d._0x001e(0, 0, 0)
-_0x0089._0x0039 = 0.5
-_0x0089._0x004b = string.char(11013, 65039, 32, 65, 76, 84, 32, 43, 32, 75, 108, 105, 107)
-_0x0089._0x004c = _0x001b._0x0024
-_0x0089._0x004d = (32 / 4)
-_0x0089._0x004e = _0x004f._0x004e._0x0072
-_0x0089._0x002e = _0x007d
-local _0x008a = _0x002a._0x002b(string.char(85, 73, 67, 111, 114, 110, 101, 114))
-_0x008a._0x0041 = _0x0042._0x002b(0, (2 + 2))
-_0x008a._0x002e = _0x0089
-local function _0x0090(_0x0091, _0x0092)
-local _0x0093 = false
-local _0x0094
-local _0x0095
-local function _0x0096(_0x0097)
-local _0x0098 = _0x0097._0x0036 - _0x0094
-_0x0091._0x0036 = _0x0035._0x002b(
-_0x0095._0x0099._0x009a,
-_0x0095._0x0099._0x009b + _0x0098._0x0099,
-_0x0095._0x009c._0x009a,
-_0x0095._0x009c._0x009b + _0x0098._0x009c
-)
+
+local deleteCorner = Instance.new("UICorner")
+deleteCorner.CornerRadius = UDim.new(0, 12)
+deleteCorner.Parent = deletePanel
+
+-- Icon & Title
+local deleteIcon = Instance.new("TextLabel")
+deleteIcon.Size = UDim2.new(0, 30, 1, 0)
+deleteIcon.Position = UDim2.new(0, 10, 0, 0)
+deleteIcon.BackgroundTransparency = 1
+deleteIcon.Text = "🗑️"
+deleteIcon.TextColor3 = colors.delete
+deleteIcon.TextSize = 20
+deleteIcon.Font = Enum.Font.GothamBold
+deleteIcon.Parent = deletePanel
+
+local deleteTitle = Instance.new("TextLabel")
+deleteTitle.Size = UDim2.new(0.5, 0, 1, 0)
+deleteTitle.Position = UDim2.new(0, 45, 0, 0)
+deleteTitle.BackgroundTransparency = 1
+deleteTitle.Text = "HAPUS"
+deleteTitle.TextColor3 = colors.text
+deleteTitle.TextSize = 16
+deleteTitle.Font = Enum.Font.GothamBold
+deleteTitle.TextXAlignment = Enum.TextXAlignment.Left
+deleteTitle.Parent = deletePanel
+
+-- Status ON/OFF
+local deleteStatus = Instance.new("TextLabel")
+deleteStatus.Size = UDim2.new(0, 45, 0, 25)
+deleteStatus.Position = UDim2.new(0, 120, 0.5, -12.5)
+deleteStatus.BackgroundColor3 = colors.success
+deleteStatus.Text = "ON"
+deleteStatus.TextColor3 = colors.text
+deleteStatus.TextSize = 14
+deleteStatus.Font = Enum.Font.GothamBold
+deleteStatus.Parent = deletePanel
+
+local deleteStatusCorner = Instance.new("UICorner")
+deleteStatusCorner.CornerRadius = UDim.new(0, 8)
+deleteStatusCorner.Parent = deleteStatus
+
+-- Tooltip
+local deleteTooltip = Instance.new("TextLabel")
+deleteTooltip.Size = UDim2.new(0, 100, 0, 16)
+deleteTooltip.Position = UDim2.new(0, 10, 1, 4)
+deleteTooltip.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+deleteTooltip.BackgroundTransparency = 0.5
+deleteTooltip.Text = "⬅️ ALT + Klik"
+deleteTooltip.TextColor3 = colors.textDim
+deleteTooltip.TextSize = 8
+deleteTooltip.Font = Enum.Font.Gotham
+deleteTooltip.Parent = deletePanel
+
+local deleteTooltipCorner = Instance.new("UICorner")
+deleteTooltipCorner.CornerRadius = UDim.new(0, 4)
+deleteTooltipCorner.Parent = deleteTooltip
+
+-- ============================================================================
+-- FUNGSI DRAG UNTUK KEDUA PANEL
+-- ============================================================================
+
+-- Drag function
+local function makeDraggable(frame, topBar)
+    local dragging = false
+    local dragStart
+    local startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+
+    topBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            update(input)
+        end
+    end)
 end
-_0x0092._0x009d:_0x009e(function(_0x0097)
-if _0x0097._0x009f == _0x004f._0x009f._0x00a0 then
-_0x0093 = true
-_0x0094 = _0x0097._0x0036
-_0x0095 = _0x0091._0x0036
-_0x0097._0x00a1:_0x009e(function()
-if _0x0097._0x00a2 == _0x004f._0x00a2._0x00a3 then
-_0x0093 = false
-end
+
+-- Terapkan drag ke kedua panel
+makeDraggable(cookFrame, cookTopBar)
+makeDraggable(deletePanel, deletePanel)  -- Panel delete bisa di-drag dari mana aja
+
+-- ============================================================================
+-- MINIMIZE UNTUK AUTO COOK
+-- ============================================================================
+local cookMinimized = false
+
+cookMinimize.MouseButton1Click:Connect(function()
+    cookMinimized = not cookMinimized
+    
+    local targetSize = cookMinimized and UDim2.new(0, 320, 0, 70) or UDim2.new(0, 320, 0, 380)
+    local tween = TweenService:Create(cookFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = targetSize})
+    tween:Play()
+    
+    cookContent.Visible = not cookMinimized
+    cookMinimize.Text = cookMinimized and "□" or "−"
 end)
-end
+
+-- Close auto cook (sembunyiin aja)
+cookClose.MouseButton1Click:Connect(function()
+    cookFrame.Visible = not cookFrame.Visible
 end)
-_0x0011._0x00a4:_0x009e(function(_0x0097)
-if _0x0093 and _0x0097._0x009f == _0x004f._0x009f._0x00a5 then
-_0x0096(_0x0097)
+
+-- ============================================================================
+-- ALT CLICK HAPUS - LOGIC
+-- ============================================================================
+
+-- Fungsi cek Alt
+local function isAltPressed()
+    return UserInputService:IsKeyDown(Enum.KeyCode.LeftAlt) 
+        or UserInputService:IsKeyDown(Enum.KeyCode.RightAlt)
 end
+
+-- Fungsi hapus objek
+local function deleteObject(obj)
+    if not obj or not obj.Parent then return false end
+    
+    local success = pcall(function()
+        obj:Destroy()
+    end)
+    
+    return success
+end
+
+-- Input handler untuk hapus
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+    if not isAltPressed() then return end
+    
+    -- Cek status ON/OFF
+    if not deleteConfig.Enabled then return end
+    
+    -- Cooldown
+    if tick() - lastClick < deleteConfig.Cooldown then return end
+    lastClick = tick()
+    
+    -- Raycast
+    local mousePos = UserInputService:GetMouseLocation()
+    local ray = Camera:ViewportPointToRay(mousePos.X, mousePos.Y)
+    
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Blacklist
+    params.FilterDescendantsInstances = {LocalPlayer.Character}
+    
+    local result = workspace:Raycast(ray.Origin, ray.Direction * 500, params)
+    
+    if result then
+        deleteObject(result.Instance)
+    end
 end)
-end
-_0x0090(_0x0033, _0x0046)
-_0x0090(_0x007d, _0x007d)
-local _0x00af = false
-_0x0057._0x00b0:_0x009e(function()
-_0x00af = not _0x00af
-local _0x00b1 = _0x00af and _0x0035._0x002b(0, (160 + 160), 0, (210 / 3)) or _0x0035._0x002b(0, 320, 0, 380)
-local _0x00b2 = _0x0013:_0x00b3(_0x0033, _0x00b4._0x002b(0.3, _0x004f._0x00b5._0x00b6), {_0x0034 = _0x00b1})
-_0x00b2:_0x00b7()
-_0x0062._0x00b8 = not _0x00af
-_0x0057._0x004b = _0x00af and string.char(9633) or string.char(8722)
+
+-- Toggle delete panel
+deletePanel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        -- Toggle ON/OFF
+        deleteConfig.Enabled = not deleteConfig.Enabled
+        
+        -- Update tampilan
+        deleteStatus.Text = deleteConfig.Enabled and "ON" or "OFF"
+        deleteStatus.BackgroundColor3 = deleteConfig.Enabled and colors.success or colors.danger
+        
+        -- Animasi kecil
+        local tweenInfo = TweenInfo.new(0.1)
+        local tween = TweenService:Create(deletePanel, tweenInfo, {Size = UDim2.new(0, 185, 0, 62)})
+        tween:Play()
+        task.wait(0.1)
+        tween = TweenService:Create(deletePanel, tweenInfo, {Size = UDim2.new(0, 180, 0, 60)})
+        tween:Play()
+    end
 end)
-_0x005f._0x00b0:_0x009e(function()
-_0x0033._0x00b8 = not _0x0033._0x00b8
+
+-- ============================================================================
+-- AUTO COOK - SEMUA FUNGSI (DARI SCRIPT PERTAMA)
+-- ============================================================================
+
+-- ================= PROXIMITY PROMPT =================
+local currentPrompt = nil
+
+ProximityPromptService.PromptShown:Connect(function(prompt)
+    currentPrompt = prompt
 end)
-local function _0x00bf()
-return _0x0011:_0x00c0(_0x004f._0x00c1._0x00c2)
-or _0x0011:_0x00c0(_0x004f._0x00c1._0x00c3)
-end
-local function _0x00c5(_0x00c6)
-if not _0x00c6 or not _0x00c6._0x002e then return false end
-local _0x0021 = pcall(function()
-_0x00c6:_0x00c7()
+
+ProximityPromptService.PromptHidden:Connect(function(prompt)
+    if currentPrompt == prompt then
+        currentPrompt = nil
+    end
 end)
-return _0x0021
+
+local function triggerPrompt()
+    if currentPrompt then
+        fireproximityprompt(currentPrompt, currentPrompt.HoldDuration)
+        task.wait(0.5)
+    end
 end
-_0x0011._0x009d:_0x009e(function(_0x0097, _0x00cb)
-if _0x00cb then return end
-if _0x0097._0x009f ~= _0x004f._0x009f._0x00a0 then return end
-if not _0x00bf() then return end
-if not _0x0077._0x0079 then return end
-if _0x00ce() - _0x007a < _0x0077._0x0078 then return end
-_0x007a = _0x00ce()
-local _0x00d0 = _0x0011:_0x00d1()
-local _0x00d2 = _0x0014:_0x00d3(_0x00d0._0x0099, _0x00d0._0x009c)
-local _0x00d4 = _0x00d5._0x002b()
-_0x00d4._0x00d6 = _0x004f._0x00d7._0x00d8
-_0x00d4._0x00d9 = {_0x0018._0x00da}
-local _0x00db = _0x0015:_0x00cf(_0x00d2._0x00dc, _0x00d2._0x00dd * 500, _0x00d4)
-if _0x00db then
-_0x00c5(_0x00db._0x002a)
+
+-- ================= INVENTORY (FIXED!) =================
+local function countItem(name)
+    local count = 0
+
+    for _, item in pairs(player.Backpack:GetChildren()) do
+        if item.Name == name then
+            count += 1
+        end
+    end
+
+    local character = player.Character
+    if character then
+        for _, item in pairs(character:GetChildren()) do
+            if item.Name == name then
+                count += 1
+            end
+        end
+    end
+
+    return count
 end
+
+local function updateInventory()
+    local waterCount = countItem("Water")
+    local sugarCount = countItem("Sugar Block Bag")
+    local gelatinCount = countItem("Gelatin")
+    local emptyCount = countItem("Empty Bag")
+    
+    cookInventoryLabel.Text = string.format(
+        "💧 Water       : %d\n🍚 Sugar       : %d\n🧪 Gelatin     : %d\n👜 Empty Bag   : %d",
+        waterCount,
+        sugarCount,
+        gelatinCount,
+        emptyCount
+    )
+end
+
+player.Backpack.ChildAdded:Connect(updateInventory)
+player.Backpack.ChildRemoved:Connect(updateInventory)
+
+player.CharacterAdded:Connect(function(newCharacter)
+    task.wait(1)
+    updateInventory()
+    newCharacter.ChildAdded:Connect(updateInventory)
+    newCharacter.ChildRemoved:Connect(updateInventory)
 end)
-_0x007d._0x009d:_0x009e(function(_0x0097)
-if _0x0097._0x009f == _0x004f._0x009f._0x00a0 then
-_0x0077._0x0079 = not _0x0077._0x0079
-_0x0086._0x004b = _0x0077._0x0079 and string.char(79, 78) or string.char(79, 70, 70)
-_0x0086._0x0038 = _0x0077._0x0079 and _0x001b._0x0021 or _0x001b._0x0022
-local _0x00e2 = _0x00b4._0x002b(0.1)
-local _0x00b2 = _0x0013:_0x00b3(_0x007d, _0x00e2, {_0x0034 = _0x0035._0x002b(0, (555 / 3), 0, 62)})
-_0x00b2:_0x00b7()
-_0x00e3._0x00e4(0.1)
-_0x00b2 = _0x0013:_0x00b3(_0x007d, _0x00e2, {_0x0034 = _0x0035._0x002b(0, (540 / 3), 0, 60)})
-_0x00b2:_0x00b7()
-end
+
+task.spawn(function()
+    while gui and gui.Parent do
+        task.wait(5)
+        updateInventory()
+    end
 end)
-local _0x00eb = nil
-_0x0012._0x00ec:_0x009e(function(_0x00ed)
-_0x00eb = _0x00ed
+
+updateInventory()
+
+-- ================= AUTO COOK LOOP =================
+local cookRunning = false
+
+local function setCookStatus(text)
+    cookStatusLabel.Text = "Status: " .. text
+end
+
+local function equipTool(name)
+    if not player.Character then
+        return false
+    end
+    
+    local tool = player.Backpack:FindFirstChild(name) or player.Character:FindFirstChild(name)
+
+    if tool and player.Character and player.Character:FindFirstChild("Humanoid") then
+        pcall(function()
+            player.Character.Humanoid:EquipTool(tool)
+        end)
+        task.wait(0.5)
+        return true
+    end
+    return false
+end
+
+local function waitWithCancel(seconds)
+    for i = 1, seconds do
+        if not cookRunning then
+            return false
+        end
+        setCookStatus(string.format("⏳ Menunggu %d/%ds", i, seconds))
+        task.wait(1)
+    end
+    return true
+end
+
+local function autoCookLoop()
+    while cookRunning do
+        
+        setCookStatus("💧 Menuangkan Air...")
+        if not equipTool("Water") then
+            setCookStatus("❌ Water tidak ada!")
+            cookRunning = false
+            break
+        end
+        triggerPrompt()
+        
+        if not waitWithCancel(23) then break end
+
+        setCookStatus("🍚 Menambahkan Sugar...")
+        if not equipTool("Sugar Block Bag") then
+            setCookStatus("❌ Sugar tidak ada!")
+            cookRunning = false
+            break
+        end
+        triggerPrompt()
+
+        setCookStatus("🧪 Memasukkan Gelatin...")
+        if not equipTool("Gelatin") then
+            setCookStatus("❌ Gelatin tidak ada!")
+            cookRunning = false
+            break
+        end
+        triggerPrompt()
+
+        if not waitWithCancel(48) then break end
+
+        setCookStatus("👜 Mengambil Empty Bag...")
+        if not equipTool("Empty Bag") then
+            setCookStatus("❌ Empty Bag tidak ada!")
+            cookRunning = false
+            break
+        end
+        triggerPrompt()
+
+        setCookStatus("🔄 Selesai, mengulang...")
+        task.wait(1)
+    end
+
+    setCookStatus("Idle")
+    cookRunning = false
+    cookBtnText.Text = "AUTO COOK : OFF"
+    cookButton.BackgroundColor3 = colors.danger
+end
+
+-- Tombol auto cook
+cookButton.MouseButton1Click:Connect(function()
+    cookRunning = not cookRunning
+
+    if cookRunning then
+        cookBtnText.Text = "AUTO COOK : ON"
+        cookButton.BackgroundColor3 = colors.success
+        setCookStatus("🚀 Memulai...")
+        task.spawn(autoCookLoop)
+    else
+        cookBtnText.Text = "AUTO COOK : OFF"
+        cookButton.BackgroundColor3 = colors.danger
+        setCookStatus("Idle")
+    end
+    
+    -- Animasi button
+    local tween = TweenService:Create(cookButton, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, 57)})
+    tween:Play()
+    task.wait(0.1)
+    tween = TweenService:Create(cookButton, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 55)})
+    tween:Play()
 end)
-_0x0012._0x00ee:_0x009e(function(_0x00ed)
-if _0x00eb == _0x00ed then
-_0x00eb = nil
-end
-end)
-local function _0x00ef()
-if _0x00eb then
-_0x00f0(_0x00eb, _0x00eb._0x00f1)
-_0x00e3._0x00e4(0.5)
-end
-end
-local function _0x00f4(_0x00f5)
-local _0x00f6 = 0
-for _0x00f7, _0x00f8 in pairs(_0x0017._0x00f9:_0x00fa()) do
-if _0x00f8._0x002c == _0x00f5 then
-_0x00f6 = _0x00f6 + 1
-end
-end
-local _0x00fb = _0x0017._0x00da
-if _0x00fb then
-for _0x00f7, _0x00f8 in pairs(_0x00fb:_0x00fa()) do
-if _0x00f8._0x002c == _0x00f5 then
-_0x00f6 = _0x00f6 + 1
-end
-end
-end
-return _0x00f6
-end
-local function _0x00fc()
-local _0x00fd = _0x00f4(string.char(87, 97, 116, 101, 114))
-local _0x00fe = _0x00f4(string.char(83, 117, 103, 97, 114, 32, 66, 108, 111, 99, 107, 32, 66, 97, 103))
-local _0x00ff = _0x00f4(string.char(71, 101, 108, 97, 116, 105, 110))
-local _0x0100 = _0x00f4(string.char(69, 109, 112, 116, 121, 32, 66, 97, 103))
-_0x0071._0x004b = string.format(
-string.char(55357, 56487, 32, 87, 97, 116, 101, 114, 32, 32, 32, 32, 32, 32, 32, 58, 32, 37, 100, 10, 55356, 57178, 32, 83, 117, 103, 97, 114, 32, 32, 32, 32, 32, 32, 32, 58, 32, 37, 100, 10, 55358, 56810, 32, 71, 101, 108, 97, 116, 105, 110, 32, 32, 32, 32, 32, 58, 32, 37, 100, 10, 55357, 56412, 32, 69, 109, 112, 116, 121, 32, 66, 97, 103, 32, 32, 32, 58, 32, 37, 100),
-_0x00fd,
-_0x00fe,
-_0x00ff,
-_0x0100
-)
-end
-_0x0017._0x00f9._0x0101:_0x009e(_0x00fc)
-_0x0017._0x00f9._0x0102:_0x009e(_0x00fc)
-_0x0017._0x0103:_0x009e(function(_0x0104)
-_0x00e3._0x00e4(1)
-_0x00fc()
-_0x0104._0x0101:_0x009e(_0x00fc)
-_0x0104._0x0102:_0x009e(_0x00fc)
-end)
-_0x00e3._0x0105(function()
-while _0x0029 and _0x0029._0x002e do
-_0x00e3._0x00e4((2 + 3))
-_0x00fc()
-end
-end)
-_0x00fc()
-local _0x0107 = false
-local function _0x0108(_0x0023)
-_0x006c._0x004b = string.char(83, 116, 97, 116, 117, 115, 58, 32) .. _0x0023
-end
-local function _0x0109(_0x00f5)
-if not _0x0017._0x00da then
-return false
-end
-local _0x010a = _0x0017._0x00f9:_0x010b(_0x00f5) or _0x0017._0x00da:_0x010b(_0x00f5)
-if _0x010a and _0x0017._0x00da and _0x0017._0x00da:_0x010b(string.char(72, 117, 109, 97, 110, 111, 105, 100)) then
-pcall(function()
-_0x0017._0x00da._0x010c:_0x010d(_0x010a)
-end)
-_0x00e3._0x00e4(0.5)
-return true
-end
-return false
-end
-local function _0x010e(_0x010f)
-for _0x003d = 1, _0x010f do
-if not _0x0107 then
-return false
-end
-_0x0108(string.format(string.char(9203, 32, 77, 101, 110, 117, 110, 103, 103, 117, 32, 37, 100, 47, 37, 100, 115), _0x003d, _0x010f))
-_0x00e3._0x00e4(1)
-end
-return true
-end
-local function _0x0110()
-while _0x0107 do
-_0x0108(string.char(55357, 56487, 32, 77, 101, 110, 117, 97, 110, 103, 107, 97, 110, 32, 65, 105, 114, 46, 46, 46))
-if not _0x0109(string.char(87, 97, 116, 101, 114)) then
-_0x0108(string.char(10060, 32, 87, 97, 116, 101, 114, 32, 116, 105, 100, 97, 107, 32, 97, 100, 97, 33))
-_0x0107 = false
-break
-end
-_0x00ef()
-if not _0x010e(23) then break end
-_0x0108(string.char(55356, 57178, 32, 77, 101, 110, 97, 109, 98, 97, 104, 107, 97, 110, 32, 83, 117, 103, 97, 114, 46, 46, 46))
-if not _0x0109(string.char(83, 117, 103, 97, 114, 32, 66, 108, 111, 99, 107, 32, 66, 97, 103)) then
-_0x0108(string.char(10060, 32, 83, 117, 103, 97, 114, 32, 116, 105, 100, 97, 107, 32, 97, 100, 97, 33))
-_0x0107 = false
-break
-end
-_0x00ef()
-_0x0108(string.char(55358, 56810, 32, 77, 101, 109, 97, 115, 117, 107, 107, 97, 110, 32, 71, 101, 108, 97, 116, 105, 110, 46, 46, 46))
-if not _0x0109(string.char(71, 101, 108, 97, 116, 105, 110)) then
-_0x0108(string.char(10060, 32, 71, 101, 108, 97, 116, 105, 110, 32, 116, 105, 100, 97, 107, 32, 97, 100, 97, 33))
-_0x0107 = false
-break
-end
-_0x00ef()
-if not _0x010e(48) then break end
-_0x0108(string.char(55357, 56412, 32, 77, 101, 110, 103, 97, 109, 98, 105, 108, 32, 69, 109, 112, 116, 121, 32, 66, 97, 103, 46, 46, 46))
-if not _0x0109(string.char(69, 109, 112, 116, 121, 32, 66, 97, 103)) then
-_0x0108(string.char(10060, 32, 69, 109, 112, 116, 121, 32, 66, 97, 103, 32, 116, 105, 100, 97, 107, 32, 97, 100, 97, 33))
-_0x0107 = false
-break
-end
-_0x00ef()
-_0x0108(string.char(55357, 56580, 32, 83, 101, 108, 101, 115, 97, 105, 44, 32, 109, 101, 110, 103, 117, 108, 97, 110, 103, 46, 46, 46))
-_0x00e3._0x00e4(1)
-end
-_0x0108(string.char(73, 100, 108, 101))
-_0x0107 = false
-_0x0066._0x004b = string.char(65, 85, 84, 79, 32, 67, 79, 79, 75, 32, 58, 32, 79, 70, 70)
-_0x0064._0x0038 = _0x001b._0x0022
-end
-_0x0064._0x00b0:_0x009e(function()
-_0x0107 = not _0x0107
-if _0x0107 then
-_0x0066._0x004b = string.char(65, 85, 84, 79, 32, 67, 79, 79, 75, 32, 58, 32, 79, 78)
-_0x0064._0x0038 = _0x001b._0x0021
-_0x0108(string.char(55357, 56960, 32, 77, 101, 109, 117, 108, 97, 105, 46, 46, 46))
-_0x00e3._0x0105(_0x0110)
-else
-_0x0066._0x004b = string.char(65, 85, 84, 79, 32, 67, 79, 79, 75, 32, 58, 32, 79, 70, 70)
-_0x0064._0x0038 = _0x001b._0x0022
-_0x0108(string.char(73, 100, 108, 101))
-end
-local _0x00b2 = _0x0013:_0x00b3(_0x0064, _0x00b4._0x002b(0.2), {_0x0034 = _0x0035._0x002b(1, -5, 0, 57)})
-_0x00b2:_0x00b7()
-_0x00e3._0x00e4(0.1)
-_0x00b2 = _0x0013:_0x00b3(_0x0064, _0x00b4._0x002b(0.2), {_0x0034 = _0x0035._0x002b(1, 0, 0, (110 / 2))})
-_0x00b2:_0x00b7()
-end)
-_0x0108(string.char(73, 100, 108, 101))
-print(string.char(10) .. (string.char(61)):rep(60))
-print(string.char(55357, 56613, 32, 77, 85, 76, 84, 73, 32, 84, 79, 79, 76, 32, 80, 65, 78, 69, 76, 32, 45, 32, 82, 69, 65, 68, 89, 33))
-print((string.char(61)):rep((120 / 2)))
-print(string.char(55356, 57203, 32, 65, 85, 84, 79, 32, 67, 79, 79, 75, 32, 80, 65, 78, 69, 76, 32, 40, 75, 73, 82, 73, 41))
-print(string.char(32, 32, 32, 45, 32, 75, 108, 105, 107, 32, 83, 84, 65, 82, 84, 32, 117, 110, 116, 117, 107, 32, 97, 117, 116, 111, 32, 109, 97, 115, 97, 107))
-print(string.char(32, 32, 32, 45, 32, 73, 110, 118, 101, 110, 116, 111, 114, 121, 32, 111, 116, 111, 109, 97, 116, 105, 115, 32, 116, 101, 114, 117, 112, 100, 97, 116, 101))
-print(string.char(32, 32, 32, 45, 32, 65, 109, 97, 110, 32, 107, 101, 116, 105, 107, 97, 32, 109, 97, 116, 105))
+
+-- Initial setup
+setCookStatus("Idle")
+
+-- ============================================================================
+-- FINAL PRINT
+-- ============================================================================
+
+print("\n" .. ("="):rep(60))
+print("🔥 MULTI TOOL PANEL - READY!")
+print(("="):rep(60))
+print("🍳 AUTO COOK PANEL (KIRI)")
+print("   - Klik START untuk auto masak")
+print("   - Inventory otomatis terupdate")
+print("   - Aman ketika mati")
 print("")
-print(string.char(55357, 56785, 65039, 32, 65, 76, 84, 32, 67, 76, 73, 67, 75, 32, 72, 65, 80, 85, 83, 32, 40, 75, 65, 78, 65, 78, 41))
-print(string.char(32, 32, 32, 45, 32, 75, 108, 105, 107, 32, 112, 97, 110, 101, 108, 32, 117, 110, 116, 117, 107, 32, 79, 78, 47, 79, 70, 70))
-print(string.char(32, 32, 32, 45, 32, 65, 76, 84, 32, 43, 32, 75, 108, 105, 107, 32, 107, 105, 114, 105, 32, 104, 97, 112, 117, 115, 32, 111, 98, 106, 101, 107))
-print(string.char(32, 32, 32, 45, 32, 67, 111, 111, 108, 100, 111, 119, 110, 32, 48, 46, 50, 32, 100, 101, 116, 105, 107))
+print("🗑️ ALT CLICK HAPUS (KANAN)")
+print("   - Klik panel untuk ON/OFF")
+print("   - ALT + Klik kiri hapus objek")
+print("   - Cooldown 0.2 detik")
 print("")
-print(string.char(55357, 56524, 32, 75, 101, 100, 117, 97, 32, 112, 97, 110, 101, 108, 32, 98, 105, 115, 97, 32, 100, 105, 45, 68, 82, 65, 71, 33))
-print(string.char(55356, 57263, 32, 75, 108, 105, 107, 32, 91, 45, 93, 32, 117, 110, 116, 117, 107, 32, 109, 105, 110, 105, 109, 105, 122, 101, 32, 97, 117, 116, 111, 32, 99, 111, 111, 107))
-print(string.char(55356, 57263, 32, 75, 108, 105, 107, 32, 91, 88, 93, 32, 117, 110, 116, 117, 107, 32, 115, 101, 109, 98, 117, 110, 121, 105, 105, 110, 32, 112, 97, 110, 101, 108))
-print((string.char(61)):rep((120 / 2)))
+print("📌 Kedua panel bisa di-DRAG!")
+print("🎯 Klik [-] untuk minimize auto cook")
+print("🎯 Klik [X] untuk sembunyiin panel")
+print(("="):rep(60))
