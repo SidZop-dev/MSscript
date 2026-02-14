@@ -1,7 +1,7 @@
 --[[
 ╔════════════════════════════════════════════════════════════╗
 ║   ULTIMATE MULTI TOOL - AUTO COOK + HITBOX + DELETE       ║
-║   HITBOX SAMA PERSIS KAYAK VERSI ASLI!                     ║
+║   FIXED: Panel Hitbox Bisa di-Minimize!                   ║
 ╚════════════════════════════════════════════════════════════╝
 ]]
 
@@ -43,7 +43,7 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- ============================================================================
--- PANEL 1: AUTO COOK (KIRI) - SAMA KAYA SEBELUMNYA
+-- PANEL 1: AUTO COOK (KIRI)
 -- ============================================================================
 
 -- ================= MAIN FRAME AUTO COOK =================
@@ -241,7 +241,7 @@ cookInventoryLabel.TextYAlignment = Enum.TextYAlignment.Top
 cookInventoryLabel.Parent = cookInvCard
 
 -- ============================================================================
--- PANEL 2: HITBOX EXPANDER (TENGAH) - VERSI ASLI!
+-- PANEL 2: HITBOX EXPANDER (TENGAH) - VERSI ASLI + MINIMIZE FIX
 -- ============================================================================
 
 local hitboxFrame = Instance.new("Frame")
@@ -777,7 +777,7 @@ makeDraggable(hitboxFrame, hitboxTopBar)
 makeDraggable(deletePanel, deletePanel)
 
 -- ============================================================================
--- MINIMIZE UNTUK SEMUA PANEL
+-- MINIMIZE UNTUK SEMUA PANEL (FIXED!)
 -- ============================================================================
 
 local cookMinimized = false
@@ -797,7 +797,8 @@ end)
 local hitboxMinimized = false
 hitboxMinimize.MouseButton1Click:Connect(function()
     hitboxMinimized = not hitboxMinimized
-    content.Visible = not hitboxMinimized
+    -- FIXED: ganti 'content' jadi 'hitboxContent'
+    hitboxContent.Visible = not hitboxMinimized  
     hitboxFrame.Size = hitboxMinimized and UDim2.new(0,300,0,40) or UDim2.new(0,300,0,420)
     hitboxMinimize.Text = hitboxMinimized and "□" or "−"
 end)
