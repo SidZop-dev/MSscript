@@ -1,7 +1,7 @@
 --[[
 ╔════════════════════════════════════════════════════════════╗
 ║   ULTIMATE MULTI TOOL - AUTO COOK + HITBOX + DELETE       ║
-║   FIXED: Panel Hitbox Bisa di-Minimize!                   ║
+║   + SPEED SLIDER (ANTI RESET + MINIMIZE + TOGGLE)         ║
 ╚════════════════════════════════════════════════════════════╝
 ]]
 
@@ -34,11 +34,12 @@ local colors = {
     accent = Color3.fromRGB(168, 85, 247),
     delete = Color3.fromRGB(255, 70, 70),
     hitbox = Color3.fromRGB(100, 100, 255),
+    speed = Color3.fromRGB(255, 200, 100),
 }
 
 -- ================= GLOBAL GUI =================
 local gui = Instance.new("ScreenGui")
-gui.Name = "MultiToolPanel"
+gui.Name = "UltimateMultiTool"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
@@ -46,10 +47,9 @@ gui.Parent = player:WaitForChild("PlayerGui")
 -- PANEL 1: AUTO COOK (KIRI)
 -- ============================================================================
 
--- ================= MAIN FRAME AUTO COOK =================
 local cookFrame = Instance.new("Frame")
 cookFrame.Size = UDim2.new(0, 320, 0, 380)
-cookFrame.Position = UDim2.new(0.02, 0, 0.1, 0)  -- Kiri
+cookFrame.Position = UDim2.new(0.02, 0, 0.1, 0)
 cookFrame.BackgroundColor3 = colors.bg
 cookFrame.BackgroundTransparency = 0.1
 cookFrame.BorderSizePixel = 0
@@ -76,7 +76,7 @@ local cookCorner = Instance.new("UICorner")
 cookCorner.CornerRadius = UDim.new(0, 20)
 cookCorner.Parent = cookFrame
 
--- ================= TOP BAR AUTO COOK =================
+-- Top Bar
 local cookTopBar = Instance.new("Frame")
 cookTopBar.Size = UDim2.new(1, 0, 0, 50)
 cookTopBar.BackgroundColor3 = colors.surface
@@ -127,7 +127,7 @@ local cookMinCorner = Instance.new("UICorner")
 cookMinCorner.CornerRadius = UDim.new(0, 10)
 cookMinCorner.Parent = cookMinimize
 
--- Close Button (sembunyiin panel aja, bukan hapus gui)
+-- Close Button
 local cookClose = Instance.new("TextButton")
 cookClose.Size = UDim2.new(0, 35, 0, 35)
 cookClose.Position = UDim2.new(1, -40, 0.5, -17.5)
@@ -143,7 +143,7 @@ local cookCloseCorner = Instance.new("UICorner")
 cookCloseCorner.CornerRadius = UDim.new(0, 10)
 cookCloseCorner.Parent = cookClose
 
--- ================= CONTENT AUTO COOK =================
+-- Content
 local cookContent = Instance.new("Frame")
 cookContent.Size = UDim2.new(1, -30, 1, -70)
 cookContent.Position = UDim2.new(0, 15, 0, 60)
@@ -241,12 +241,12 @@ cookInventoryLabel.TextYAlignment = Enum.TextYAlignment.Top
 cookInventoryLabel.Parent = cookInvCard
 
 -- ============================================================================
--- PANEL 2: HITBOX EXPANDER (TENGAH) - VERSI ASLI + MINIMIZE FIX
+-- PANEL 2: HITBOX EXPANDER (TENGAH)
 -- ============================================================================
 
 local hitboxFrame = Instance.new("Frame")
 hitboxFrame.Size = UDim2.new(0, 300, 0, 420)
-hitboxFrame.Position = UDim2.new(0.35, -150, 0.1, 0)  -- Tengah
+hitboxFrame.Position = UDim2.new(0.35, -150, 0.1, 0)
 hitboxFrame.BackgroundColor3 = colors.bg
 hitboxFrame.BackgroundTransparency = 0.1
 hitboxFrame.BorderSizePixel = 0
@@ -273,7 +273,7 @@ local hitboxCorner = Instance.new("UICorner")
 hitboxCorner.CornerRadius = UDim.new(0, 20)
 hitboxCorner.Parent = hitboxFrame
 
--- ================= TOP BAR HITBOX =================
+-- Top Bar
 local hitboxTopBar = Instance.new("Frame")
 hitboxTopBar.Size = UDim2.new(1, 0, 0, 40)
 hitboxTopBar.BackgroundTransparency = 1
@@ -314,7 +314,7 @@ hitboxClose.TextColor3 = Color3.new(1,1,1)
 hitboxClose.Parent = hitboxTopBar
 Instance.new("UICorner", hitboxClose).CornerRadius = UDim.new(0,8)
 
--- ================= CONTENT HITBOX =================
+-- Content
 local hitboxContent = Instance.new("Frame")
 hitboxContent.Size = UDim2.new(1,-20,1,-60)
 hitboxContent.Position = UDim2.new(0,10,0,50)
@@ -326,7 +326,64 @@ hitboxLayout.Padding = UDim.new(0,10)
 hitboxLayout.SortOrder = Enum.SortOrder.LayoutOrder
 hitboxLayout.Parent = hitboxContent
 
--- ================= FUNGSI BUAT TOGGLE HITBOX =================
+-- Hitbox Variables
+local hitboxEnabled = false
+local headSize = 1.5
+local bodySize = 1.2
+local originalSizes = {}
+
+local function storeOriginalSizes(char)
+    if not char then return end
+    for _, part in ipairs(char:GetChildren()) do
+        if part:IsA("BasePart") then
+            originalSizes[part] = part.Size
+        end
+    end
+end
+
+local function restoreOriginalSizes(char)
+    if not char then return end
+    for part, originalSize in pairs(originalSizes) do
+        if part and part.Parent then
+            part.Size = originalSize
+        end
+    end
+    table.clear(originalSizes)
+end
+
+local function expandHitbox(char, headMult, bodyMult)
+    if not char then return end
+    
+    for _, part in ipairs(char:GetChildren()) do
+        if part:IsA("BasePart") then
+            if part.Name == "Head" then
+                part.Size = originalSizes[part] * headMult
+            else
+                part.Size = originalSizes[part] * bodyMult
+            end
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(plr)
+    if plr == player then return end
+    
+    plr.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        storeOriginalSizes(char)
+        if hitboxEnabled then
+            expandHitbox(char, headSize, bodySize)
+        end
+    end)
+end)
+
+for _, plr in ipairs(Players:GetPlayers()) do
+    if plr ~= player and plr.Character then
+        storeOriginalSizes(plr.Character)
+    end
+end
+
+-- Hitbox Toggle Function
 local function createHitboxToggle(text, default, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1,0,0,45)
@@ -373,7 +430,7 @@ local function createHitboxToggle(text, default, callback)
     return btn
 end
 
--- ================= FUNGSI BUAT SLIDER HITBOX =================
+-- Hitbox Slider Function
 local function createHitboxSlider(text, min, max, default, suffix, callback)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1,0,0,70)
@@ -466,76 +523,7 @@ local function createHitboxSlider(text, min, max, default, suffix, callback)
     return frame
 end
 
--- ============================================================================
--- HITBOX EXPANDER CORE - SAMA PERSIS!
--- ============================================================================
-
-local hitboxEnabled = false
-local headSize = 1.5
-local bodySize = 1.2
-local originalSizes = {}
-
--- Fungsi untuk menyimpan ukuran asli
-local function storeOriginalSizes(char)
-    if not char then return end
-    for _, part in ipairs(char:GetChildren()) do
-        if part:IsA("BasePart") then
-            originalSizes[part] = part.Size
-        end
-    end
-end
-
--- Fungsi untuk mengembalikan ukuran asli
-local function restoreOriginalSizes(char)
-    if not char then return end
-    for part, originalSize in pairs(originalSizes) do
-        if part and part.Parent then
-            part.Size = originalSize
-        end
-    end
-    table.clear(originalSizes)
-end
-
--- Fungsi untuk memperbesar hitbox
-local function expandHitbox(char, headMult, bodyMult)
-    if not char then return end
-    
-    for _, part in ipairs(char:GetChildren()) do
-        if part:IsA("BasePart") then
-            if part.Name == "Head" then
-                part.Size = originalSizes[part] * headMult
-            else
-                part.Size = originalSizes[part] * bodyMult
-            end
-        end
-    end
-end
-
--- Update setiap ada player baru
-Players.PlayerAdded:Connect(function(plr)
-    if plr == player then return end
-    
-    plr.CharacterAdded:Connect(function(char)
-        task.wait(0.5)
-        storeOriginalSizes(char)
-        if hitboxEnabled then
-            expandHitbox(char, headSize, bodySize)
-        end
-    end)
-end)
-
--- Untuk player yang sudah ada
-for _, plr in ipairs(Players:GetPlayers()) do
-    if plr ~= player and plr.Character then
-        storeOriginalSizes(plr.Character)
-    end
-end
-
--- ============================================================================
--- BUAT TOGGLE & SLIDER HITBOX
--- ============================================================================
-
--- Toggle utama
+-- Hitbox Toggles
 createHitboxToggle("🔴 Aktifkan Hitbox", false, function(state)
     hitboxEnabled = state
     
@@ -551,7 +539,6 @@ createHitboxToggle("🔴 Aktifkan Hitbox", false, function(state)
     end
 end)
 
--- Slider ukuran kepala (MAX 10)
 createHitboxSlider("👤 Ukuran Kepala", 1.0, 10.0, 1.5, "x", function(value)
     headSize = value
     if hitboxEnabled then
@@ -563,7 +550,6 @@ createHitboxSlider("👤 Ukuran Kepala", 1.0, 10.0, 1.5, "x", function(value)
     end
 end)
 
--- Slider ukuran badan (MAX 10)
 createHitboxSlider("💪 Ukuran Badan", 1.0, 10.0, 1.2, "x", function(value)
     bodySize = value
     if hitboxEnabled then
@@ -575,7 +561,6 @@ createHitboxSlider("💪 Ukuran Badan", 1.0, 10.0, 1.2, "x", function(value)
     end
 end)
 
--- Peringatan
 local hitboxWarning = Instance.new("TextLabel")
 hitboxWarning.Size = UDim2.new(1,0,0,40)
 hitboxWarning.BackgroundTransparency = 1
@@ -588,10 +573,308 @@ hitboxWarning.TextYAlignment = Enum.TextYAlignment.Top
 hitboxWarning.Parent = hitboxContent
 
 -- ============================================================================
--- PANEL 3: ALT CLICK HAPUS (KANAN)
+-- PANEL 3: SPEED SLIDER (BAWAH TENGAH)
 -- ============================================================================
 
--- Konfigurasi delete
+local speedFrame = Instance.new("Frame")
+speedFrame.Size = UDim2.new(0, 300, 0, 150)
+speedFrame.Position = UDim2.new(0.35, -150, 0.65, -75)
+speedFrame.BackgroundColor3 = colors.bg
+speedFrame.BackgroundTransparency = 0.1
+speedFrame.BorderSizePixel = 0
+speedFrame.Draggable = false
+speedFrame.Parent = gui
+
+-- Glow effect
+for i = 1, 3 do
+    local glow = Instance.new("Frame")
+    glow.Size = UDim2.new(1, 8*i, 1, 8*i)
+    glow.Position = UDim2.new(0, -4*i, 0, -4*i)
+    glow.BackgroundColor3 = colors.speed
+    glow.BackgroundTransparency = 0.9
+    glow.BorderSizePixel = 0
+    glow.ZIndex = -i
+    glow.Parent = speedFrame
+    
+    local glowCorner = Instance.new("UICorner")
+    glowCorner.CornerRadius = UDim.new(0, 20 + (2*i))
+    glowCorner.Parent = glow
+end
+
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 20)
+speedCorner.Parent = speedFrame
+
+-- Title Bar
+local speedTopBar = Instance.new("Frame")
+speedTopBar.Size = UDim2.new(1, 0, 0, 40)
+speedTopBar.BackgroundColor3 = colors.surface
+speedTopBar.BackgroundTransparency = 0.3
+speedTopBar.BorderSizePixel = 0
+speedTopBar.Parent = speedFrame
+
+local speedTopBarCorner = Instance.new("UICorner")
+speedTopBarCorner.CornerRadius = UDim.new(0, 20)
+speedTopBarCorner.Parent = speedTopBar
+
+-- Icon
+local speedIcon = Instance.new("TextLabel")
+speedIcon.Size = UDim2.new(0, 40, 1, 0)
+speedIcon.Position = UDim2.new(0, 10, 0, 0)
+speedIcon.BackgroundTransparency = 1
+speedIcon.Text = "⚡"
+speedIcon.TextColor3 = colors.speed
+speedIcon.TextSize = 24
+speedIcon.Font = Enum.Font.GothamBold
+speedIcon.Parent = speedTopBar
+
+-- Title
+local speedTitle = Instance.new("TextLabel")
+speedTitle.Size = UDim2.new(1, -80, 1, 0)
+speedTitle.Position = UDim2.new(0, 55, 0, 0)
+speedTitle.BackgroundTransparency = 1
+speedTitle.Text = "SPEED CONTROL"
+speedTitle.TextColor3 = colors.text
+speedTitle.TextSize = 16
+speedTitle.Font = Enum.Font.GothamBlack
+speedTitle.TextXAlignment = Enum.TextXAlignment.Left
+speedTitle.Parent = speedTopBar
+
+-- Minimize Button
+local speedMinimize = Instance.new("TextButton")
+speedMinimize.Size = UDim2.new(0, 30, 0, 30)
+speedMinimize.Position = UDim2.new(1, -75, 0.5, -15)
+speedMinimize.BackgroundColor3 = colors.surface
+speedMinimize.Text = "−"
+speedMinimize.TextColor3 = colors.text
+speedMinimize.TextSize = 20
+speedMinimize.Font = Enum.Font.GothamBold
+speedMinimize.AutoButtonColor = false
+speedMinimize.Parent = speedTopBar
+
+local speedMinCorner = Instance.new("UICorner")
+speedMinCorner.CornerRadius = UDim.new(0, 8)
+speedMinCorner.Parent = speedMinimize
+
+-- Close Button
+local speedClose = Instance.new("TextButton")
+speedClose.Size = UDim2.new(0, 30, 0, 30)
+speedClose.Position = UDim2.new(1, -40, 0.5, -15)
+speedClose.BackgroundColor3 = colors.danger
+speedClose.Text = "✕"
+speedClose.TextColor3 = colors.text
+speedClose.TextSize = 16
+speedClose.Font = Enum.Font.GothamBold
+speedClose.Parent = speedTopBar
+
+local speedCloseCorner = Instance.new("UICorner")
+speedCloseCorner.CornerRadius = UDim.new(0, 8)
+speedCloseCorner.Parent = speedClose
+
+-- Content
+local speedContent = Instance.new("Frame")
+speedContent.Size = UDim2.new(1, -20, 1, -60)
+speedContent.Position = UDim2.new(0, 10, 0, 50)
+speedContent.BackgroundTransparency = 1
+speedContent.Parent = speedFrame
+
+-- Label
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(1, 0, 0, 25)
+speedLabel.Position = UDim2.new(0, 0, 0, 0)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "Adjust Speed:"
+speedLabel.TextColor3 = colors.textDim
+speedLabel.TextSize = 14
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.Parent = speedContent
+
+-- Value display
+local speedValue = Instance.new("TextLabel")
+speedValue.Size = UDim2.new(0, 50, 0, 25)
+speedValue.Position = UDim2.new(1, -50, 0, 0)
+speedValue.BackgroundColor3 = colors.speed
+speedValue.Text = "16"
+speedValue.TextColor3 = colors.text
+speedValue.Font = Enum.Font.GothamBold
+speedValue.TextSize = 14
+speedValue.Parent = speedContent
+Instance.new("UICorner", speedValue).CornerRadius = UDim.new(0, 6)
+
+-- Current speed
+local speedCurrent = Instance.new("TextLabel")
+speedCurrent.Size = UDim2.new(1, 0, 0, 20)
+speedCurrent.Position = UDim2.new(0, 0, 0, 30)
+speedCurrent.BackgroundTransparency = 1
+speedCurrent.Text = "Current: 16"
+speedCurrent.TextColor3 = colors.textDim
+speedCurrent.TextSize = 12
+speedCurrent.Font = Enum.Font.Gotham
+speedCurrent.TextXAlignment = Enum.TextXAlignment.Left
+speedCurrent.Parent = speedContent
+
+-- Slider background
+local speedSliderBg = Instance.new("Frame")
+speedSliderBg.Size = UDim2.new(1, 0, 0, 10)
+speedSliderBg.Position = UDim2.new(0, 0, 0, 60)
+speedSliderBg.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+speedSliderBg.Parent = speedContent
+Instance.new("UICorner", speedSliderBg).CornerRadius = UDim.new(1, 0)
+
+-- Slider fill
+local speedFill = Instance.new("Frame")
+speedFill.Size = UDim2.new(0.7, 0, 1, 0)
+speedFill.BackgroundColor3 = colors.speed
+speedFill.Parent = speedSliderBg
+Instance.new("UICorner", speedFill).CornerRadius = UDim.new(1, 0)
+
+-- Slider knob
+local speedKnob = Instance.new("Frame")
+speedKnob.Size = UDim2.new(0, 20, 0, 20)
+speedKnob.Position = UDim2.new(0.7, -10, 0.5, -10)
+speedKnob.BackgroundColor3 = Color3.new(1, 1, 1)
+speedKnob.Parent = speedSliderBg
+Instance.new("UICorner", speedKnob).CornerRadius = UDim.new(1, 0)
+
+-- Min/Max labels
+local speedMin = Instance.new("TextLabel")
+speedMin.Size = UDim2.new(0, 30, 0, 20)
+speedMin.Position = UDim2.new(0, 0, 0, 75)
+speedMin.BackgroundTransparency = 1
+speedMin.Text = "0"
+speedMin.TextColor3 = colors.textDim
+speedMin.TextSize = 12
+speedMin.Font = Enum.Font.Gotham
+speedMin.TextXAlignment = Enum.TextXAlignment.Left
+speedMin.Parent = speedContent
+
+local speedMax = Instance.new("TextLabel")
+speedMax.Size = UDim2.new(0, 30, 0, 20)
+speedMax.Position = UDim2.new(1, -30, 0, 75)
+speedMax.BackgroundTransparency = 1
+speedMax.Text = "23"
+speedMax.TextColor3 = colors.textDim
+speedMax.TextSize = 12
+speedMax.Font = Enum.Font.Gotham
+speedMax.TextXAlignment = Enum.TextXAlignment.Right
+speedMax.Parent = speedContent
+
+-- Info
+local speedInfo = Instance.new("TextLabel")
+speedInfo.Size = UDim2.new(1, 0, 0, 20)
+speedInfo.Position = UDim2.new(0, 0, 0, 100)
+speedInfo.BackgroundTransparency = 1
+speedInfo.Text = "🔄 Anti Reset | Ctrl Kanan Toggle"
+speedInfo.TextColor3 = Color3.fromRGB(100, 255, 100)
+speedInfo.TextSize = 9
+speedInfo.Font = Enum.Font.GothamBold
+speedInfo.TextXAlignment = Enum.TextXAlignment.Left
+speedInfo.Parent = speedContent
+
+-- Speed Variables
+local minSpeed = 0
+local maxSpeed = 23
+local currentSpeed = 16
+local speedDragging = false
+local speedKeepRunning = true
+
+-- Speed Functions
+local function applySpeed()
+    pcall(function()
+        local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+        if humanoid and humanoid.WalkSpeed ~= currentSpeed then
+            humanoid.WalkSpeed = currentSpeed
+        end
+    end)
+end
+
+local function updateSpeed(value)
+    currentSpeed = math.floor(value * 10) / 10
+    speedValue.Text = tostring(currentSpeed)
+    speedCurrent.Text = "Current: " .. currentSpeed
+    speedFill.Size = UDim2.new((currentSpeed - minSpeed) / (maxSpeed - minSpeed), 0, 1, 0)
+    speedKnob.Position = UDim2.new((currentSpeed - minSpeed) / (maxSpeed - minSpeed), -10, 0.5, -10)
+    applySpeed()
+end
+
+-- Anti Reset Loop
+task.spawn(function()
+    while speedKeepRunning do
+        applySpeed()
+        task.wait(0.3)
+    end
+end)
+
+-- Speed Slider Events
+speedKnob.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        speedDragging = true
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if not speedDragging then return end
+    
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        local pos = input.Position.X - speedSliderBg.AbsolutePosition.X
+        local percent = math.clamp(pos / speedSliderBg.AbsoluteSize.X, 0, 1)
+        updateSpeed(minSpeed + (maxSpeed - minSpeed) * percent)
+    end
+end)
+
+speedSliderBg.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        local pos = input.Position.X - speedSliderBg.AbsolutePosition.X
+        local percent = math.clamp(pos / speedSliderBg.AbsoluteSize.X, 0, 1)
+        updateSpeed(minSpeed + (maxSpeed - minSpeed) * percent)
+        speedDragging = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        speedDragging = false
+    end
+end)
+
+-- Speed Minimize
+local speedMinimized = false
+local speedNormalSize = UDim2.new(0, 300, 0, 150)
+local speedMinimizedSize = UDim2.new(0, 300, 0, 40)
+
+speedMinimize.MouseButton1Click:Connect(function()
+    speedMinimized = not speedMinimized
+    speedContent.Visible = not speedMinimized
+    speedFrame.Size = speedMinimized and speedMinimizedSize or speedNormalSize
+    speedMinimize.Text = speedMinimized and "+" or "−"
+end)
+
+speedClose.MouseButton1Click:Connect(function()
+    speedFrame.Visible = false
+end)
+
+-- Right Ctrl Toggle untuk Speed Panel
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    
+    if input.KeyCode == Enum.KeyCode.RightControl then
+        speedFrame.Visible = not speedFrame.Visible
+    end
+end)
+
+-- Update speed pas respawn
+player.CharacterAdded:Connect(function()
+    task.wait(1)
+    applySpeed()
+end)
+
+updateSpeed(16)
+
+-- ============================================================================
+-- PANEL 4: ALT CLICK HAPUS (KANAN)
+-- ============================================================================
+
 local deleteConfig = {
     Cooldown = 0.2,
     Enabled = true,
@@ -600,18 +883,15 @@ local deleteConfig = {
 
 local lastClick = 0
 
--- Panel Delete
 local deletePanel = Instance.new("Frame")
 deletePanel.Size = IS_MOBILE and UDim2.new(0, 220, 0, 100) or UDim2.new(0, 180, 0, 60)
-deletePanel.Position = UDim2.new(1, -240, 0.1, 0)  -- Kanan
+deletePanel.Position = UDim2.new(1, -240, 0.1, 0)
 deletePanel.BackgroundColor3 = colors.bg
 deletePanel.BackgroundTransparency = 0.1
 deletePanel.BorderSizePixel = 0
 deletePanel.Draggable = true
-deletePanel.Active = true
 deletePanel.Parent = gui
 
--- Glow delete
 for i = 1, 3 do
     local glow = Instance.new("Frame")
     glow.Size = UDim2.new(1, 8*i, 1, 8*i)
@@ -684,7 +964,7 @@ local deleteTooltipCorner = Instance.new("UICorner")
 deleteTooltipCorner.CornerRadius = UDim.new(0, 4)
 deleteTooltipCorner.Parent = deleteTooltip
 
--- ================= TOMBOL KHUSUS HP =================
+-- Mobile Mode
 if IS_MOBILE then
     local hpNote = Instance.new("TextLabel")
     hpNote.Size = UDim2.new(1, -20, 0, 20)
@@ -732,8 +1012,57 @@ if IS_MOBILE then
     end)
 end
 
+-- Delete Logic
+local function canDelete()
+    if not deleteConfig.Enabled then return false end
+    if IS_MOBILE then
+        return deleteConfig.MobileModeActive
+    else
+        return UserInputService:IsKeyDown(Enum.KeyCode.LeftAlt) or UserInputService:IsKeyDown(Enum.KeyCode.RightAlt)
+    end
+end
+
+local function deleteObject(obj)
+    if not obj or not obj.Parent then return false end
+    local success = pcall(function() obj:Destroy() end)
+    return success
+end
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    
+    local isValidInput = IS_MOBILE and input.UserInputType == Enum.UserInputType.Touch
+        or (not IS_MOBILE and input.UserInputType == Enum.UserInputType.MouseButton1)
+    
+    if not isValidInput then return end
+    if not canDelete() then return end
+    if tick() - lastClick < deleteConfig.Cooldown then return end
+    lastClick = tick()
+    
+    local mousePos = UserInputService:GetMouseLocation()
+    local ray = Camera:ViewportPointToRay(mousePos.X, mousePos.Y)
+    
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Blacklist
+    params.FilterDescendantsInstances = {LocalPlayer.Character}
+    
+    local result = workspace:Raycast(ray.Origin, ray.Direction * 500, params)
+    
+    if result then
+        deleteObject(result.Instance)
+    end
+end)
+
+deletePanel.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        deleteConfig.Enabled = not deleteConfig.Enabled
+        deleteStatus.Text = deleteConfig.Enabled and "ON" or "OFF"
+        deleteStatus.BackgroundColor3 = deleteConfig.Enabled and colors.success or colors.danger
+    end
+end)
+
 -- ============================================================================
--- FUNGSI DRAG UNTUK SEMUA PANEL
+-- DRAG FUNCTION UNTUK SEMUA PANEL
 -- ============================================================================
 
 local function makeDraggable(frame, topBar)
@@ -775,9 +1104,10 @@ end
 makeDraggable(cookFrame, cookTopBar)
 makeDraggable(hitboxFrame, hitboxTopBar)
 makeDraggable(deletePanel, deletePanel)
+makeDraggable(speedFrame, speedTopBar)
 
 -- ============================================================================
--- MINIMIZE UNTUK SEMUA PANEL (FIXED!)
+-- MINIMIZE UNTUK SEMUA PANEL
 -- ============================================================================
 
 local cookMinimized = false
@@ -797,8 +1127,7 @@ end)
 local hitboxMinimized = false
 hitboxMinimize.MouseButton1Click:Connect(function()
     hitboxMinimized = not hitboxMinimized
-    -- FIXED: ganti 'content' jadi 'hitboxContent'
-    hitboxContent.Visible = not hitboxMinimized  
+    hitboxContent.Visible = not hitboxMinimized
     hitboxFrame.Size = hitboxMinimized and UDim2.new(0,300,0,40) or UDim2.new(0,300,0,420)
     hitboxMinimize.Text = hitboxMinimized and "□" or "−"
 end)
@@ -812,60 +1141,6 @@ hitboxClose.MouseButton1Click:Connect(function()
         end
     end
     hitboxFrame.Visible = not hitboxFrame.Visible
-end)
-
--- ============================================================================
--- ALT CLICK HAPUS - LOGIC
--- ============================================================================
-
-local function canDelete()
-    if not deleteConfig.Enabled then return false end
-    
-    if IS_MOBILE then
-        return deleteConfig.MobileModeActive
-    else
-        return UserInputService:IsKeyDown(Enum.KeyCode.LeftAlt) 
-            or UserInputService:IsKeyDown(Enum.KeyCode.RightAlt)
-    end
-end
-
-local function deleteObject(obj)
-    if not obj or not obj.Parent then return false end
-    local success = pcall(function() obj:Destroy() end)
-    return success
-end
-
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    
-    local isValidInput = IS_MOBILE and input.UserInputType == Enum.UserInputType.Touch
-        or (not IS_MOBILE and input.UserInputType == Enum.UserInputType.MouseButton1)
-    
-    if not isValidInput then return end
-    if not canDelete() then return end
-    if tick() - lastClick < deleteConfig.Cooldown then return end
-    lastClick = tick()
-    
-    local mousePos = UserInputService:GetMouseLocation()
-    local ray = Camera:ViewportPointToRay(mousePos.X, mousePos.Y)
-    
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Blacklist
-    params.FilterDescendantsInstances = {LocalPlayer.Character}
-    
-    local result = workspace:Raycast(ray.Origin, ray.Direction * 500, params)
-    
-    if result then
-        deleteObject(result.Instance)
-    end
-end)
-
-deletePanel.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        deleteConfig.Enabled = not deleteConfig.Enabled
-        deleteStatus.Text = deleteConfig.Enabled and "ON" or "OFF"
-        deleteStatus.BackgroundColor3 = deleteConfig.Enabled and colors.success or colors.danger
-    end
 end)
 
 -- ============================================================================
@@ -985,13 +1260,15 @@ setCookStatus("Idle")
 -- ============================================================================
 
 print("\n" .. ("="):rep(60))
-print("🔥 ULTIMATE MULTI TOOL - READY!")
+print("🔥 ULTIMATE MULTI TOOL - 4 FITUR!")
 print(("="):rep(60))
 print("📱 Platform: " .. (IS_MOBILE and "MOBILE" or "PC"))
 print("🍳 AUTO COOK (KIRI)")
-print("🎯 HITBOX EXPANDER (TENGAH) - Bisa bikin kepala gede 10x!")
+print("🎯 HITBOX EXPANDER (TENGAH ATAS)")
+print("⚡ SPEED CONTROL (TENGAH BAWAH)")
 print("🗑️ ALT CLICK HAPUS (KANAN)")
 print("")
 print("📌 Semua panel bisa di-DRAG!")
 print("🎯 Klik [-] untuk minimize, [X] untuk sembunyiin")
+print("🎮 Speed Panel: Right Ctrl = Toggle")
 print(("="):rep(60))
