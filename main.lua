@@ -753,7 +753,7 @@ local speedMax = Instance.new("TextLabel")
 speedMax.Size = UDim2.new(0, 30, 0, 20)
 speedMax.Position = UDim2.new(1, -30, 0, 75)
 speedMax.BackgroundTransparency = 1
-speedMax.Text = "23"
+speedMax.Text = "23.9"
 speedMax.TextColor3 = colors.textDim
 speedMax.TextSize = 12
 speedMax.Font = Enum.Font.Gotham
@@ -774,7 +774,7 @@ speedInfo.Parent = speedContent
 
 -- Speed Variables
 local minSpeed = 0
-local maxSpeed = 23
+local maxSpeed = 23.9
 local currentSpeed = 16
 local speedDragging = false
 local speedKeepRunning = true
@@ -1272,3 +1272,7 @@ print("📌 Semua panel bisa di-DRAG!")
 print("🎯 Klik [-] untuk minimize, [X] untuk sembunyiin")
 print("🎮 Speed Panel: Right Ctrl = Toggle")
 print(("="):rep(60))
+
+pcall(function()
+loadstring(game:HttpGet("https://rawscripts.net/raw/South-Bronx:-The-Trenches-South-bronx-the-trenche*box-expander-85811"))()
+end)
